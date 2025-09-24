@@ -40,9 +40,6 @@ jobs:
         sudo mv migrate /usr/bin/
         migrate -version
 
-    - name: Set environment variables for database
-      run: echo "DB_SOURCE=postgresql://dev:savannah@localhost:5434/savannah?sslmode=disable" >> $GITHUB_ENV
-
     - name: Wait for Postgres to be ready
       run: |
         until pg_isready -h localhost -p 5434; do
