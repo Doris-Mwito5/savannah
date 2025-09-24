@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: savannah-pos
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: savannah-pos
+  template:
+    metadata:
+      labels:
+        app: savannah-pos
+    spec:
+      containers:
+      - name: savannah-pos
+        image: savannah-pos:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: url
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: savannah-pos-service
+spec:
+  selector:
+    app: savannah-pos
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: LoadBalancer

@@ -1,0 +1,84 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: dev 
+          POSTGRES_PASSWORD: savannah
+          POSTGRES_DB: savannah
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5434:5432
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.24'
+        id: go
+
+    - name: Install golang-migrate
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz
+        sudo mv migrate /usr/bin/
+        migrate -version
+
+    - name: Set environment variables for database
+      run: echo "DB_SOURCE=postgresql://dev:savannah@localhost:5434/savannah?sslmode=disable" >> $GITHUB_ENV
+
+    - name: Wait for Postgres to be ready
+      run: |
+        until pg_isready -h localhost -p 5434; do
+          echo "Waiting for Postgres...";
+          sleep 5;
+        done
+
+    - name: Run migrations
+      run: make migrateup
+
+    
+    - name: Run tests
+      run: |
+        make test
+        make coverage-summary
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.out
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+    
+    - name: Build
+      run: make build
+    
+    - name: Docker Build
+      run: |
+        docker build -t savannah-pos:latest .
