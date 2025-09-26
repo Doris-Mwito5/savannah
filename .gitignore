@@ -76,3 +76,6 @@ Postman for macOS (arm64).zip/
 .tokens
 *.env
 INPUT.md
+# Large binary files
+kubectl
+minikube*
