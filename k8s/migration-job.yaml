@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
       - name: migrate
-        image: kawiramwito/savannah-pos:latest   # push this after rebuilding
+        image: kawiramwito/savannah-pos:latest  
         command: ["sh", "-c"]
         args:
           - goose -dir /migrations postgres "$DATABASE_URL" up

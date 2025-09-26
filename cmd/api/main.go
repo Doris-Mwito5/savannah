@@ -22,10 +22,6 @@ var (
 )
 
 func main() {
-	// err := config.LoadEnvConfig()
-	// if err != nil {
-	// 	log.Fatal("unable to laod .env file")
-	// }
 
 	if err := godotenv.Load(); err != nil {
 		log.Println("⚠️ No .env file found, relying on system env")
@@ -34,13 +30,6 @@ func main() {
 	if err := config.LoadEnvConfig(); err != nil {
 		log.Fatalf("❌ Failed to load config: %v", err)
 	}
-
-	log.Printf("OIDC Client ID: %s", config.AppConfig.OIDC.ClientID)
-	log.Printf("URL: %s\n", config.AppConfig.SMSService.BaseURL)
-	log.Printf("Username: %s\n", config.AppConfig.SMSService.Username)
-	log.Printf("ApiKey: %s\n", config.AppConfig.SMSService.ApiKey)
-
-
 
 
 	loggers.InitLogger("savannah-pos")
