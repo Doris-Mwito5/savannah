@@ -53,6 +53,17 @@ data/rabbitmq
 
 data/
 
+tools/
+
+# Kubernetes binaries
+kubectl*
+kubectl*
+
+# Docker and deployment artifacts
+.docker/
+deployments/bin/
+deployments/tools/
+
 #Android folder
 healthsys/
 
