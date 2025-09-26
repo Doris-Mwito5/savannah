@@ -15,5 +15,5 @@ func AddEndpoints(
 ) {
 	r.POST("/categories", createCategory(dB, categoryService))
 	r.GET("/categories/:id", getCategory(dB, categoryService))
-	r.GET("shop/:id/categories", listCategories(dB, categoryService))
+	r.GET("/shop/:id/categories", listCategories(dB, categoryService))
 }

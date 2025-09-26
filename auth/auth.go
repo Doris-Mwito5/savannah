@@ -46,9 +46,7 @@ type OIDCUserInfo struct {
 	PhoneNumber   string `json:"phone_number"`
 }
 
-// NewOIDCProvider initializes a new OIDC provider with better error handling
 func NewOIDCProvider(cfg *config.OIDCConfig) (OIDCService, error) {
-	// Validate configuration first
 	if err := validateOIDCConfig(cfg); err != nil {
 		return nil, fmt.Errorf("invalid OIDC configuration: %w", err)
 	}
@@ -57,7 +55,6 @@ func NewOIDCProvider(cfg *config.OIDCConfig) (OIDCService, error) {
 
 	log.Printf("Initializing OIDC provider with issuer: %s", cfg.IssuerURL)
 
-	// Create OIDC provider with timeout context
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
@@ -74,7 +71,7 @@ func NewOIDCProvider(cfg *config.OIDCConfig) (OIDCService, error) {
 		ClientSecret: cfg.ClientSecret,
 		RedirectURL:  cfg.RedirectURL,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"}, // Removed "phone" as it might not be supported
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"}, 
 	}
 
 	verifier := provider.Verifier(&oidc.Config{
@@ -94,7 +91,6 @@ func NewOIDCProvider(cfg *config.OIDCConfig) (OIDCService, error) {
 	}, nil
 }
 
-// validateOIDCConfig validates the OIDC configuration
 func validateOIDCConfig(cfg *config.OIDCConfig) error {
 	if cfg.ClientID == "" {
 		return errors.New("client ID is required")
@@ -111,7 +107,6 @@ func validateOIDCConfig(cfg *config.OIDCConfig) error {
 	return nil
 }
 
-// CreateAuthURL builds the login URL with random state
 func (o *OIDCProvider) CreateAuthURL(c *gin.Context) (string, string, error) {
 	state, err := generateRandomState()
 	if err != nil {
@@ -121,7 +116,6 @@ func (o *OIDCProvider) CreateAuthURL(c *gin.Context) (string, string, error) {
 
 	log.Printf("Generated state: %s", state)
 
-	// Store state in a secure cookie
 	c.SetCookie(
 		"oauth_state",    // name
 		state,           // value

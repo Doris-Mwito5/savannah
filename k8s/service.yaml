@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: savannah-pos-service
+  namespace: savannah-pos
+  labels:
+    app: savannah-pos
+spec:
+  selector:
+    app: savannah-pos
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: LoadBalancer

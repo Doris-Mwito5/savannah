@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: savannah-pos
+data:
+  PORT: "8080"
+  OIDC_ISSUER_URL: "https://accounts.google.com"
+  OIDC_REDIRECT_URL: "http://savannah-pos.local/v1/auth/callback"
+  AFRICAS_TALKING_BASE_URL: "https://api.sandbox.africastalking.com/version1/messaging"
+  AFRICAS_TALKING_USERNAME: "sandbox"
+  AFRICAS_TALKING_ENV: "sandbox"
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "465"
+  SMTP_FROM_EMAIL: "kawiramwito3@gmail.com"
+  SMTP_FROM_NAME: "Kawira Mwito"
+  ADMIN_EMAIL: "kawiramwito3@gmail.com"

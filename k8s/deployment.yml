@@ -2,11 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: savannah-pos
+  namespace: savannah-pos
 spec:
   replicas: 3
   selector:
     matchLabels:
       app: savannah-pos
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -14,21 +20,119 @@ spec:
     spec:
       containers:
       - name: savannah-pos
-        image: savannah-pos:latest
+        image: kawiramwito/savannah-pos:latest
+        imagePullPolicy: Never 
         ports:
         - containerPort: 8080
         env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PORTar
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: JWT_SECRET
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: db-secret
-              key: url
+              name: app-secrets
+              key: DATABASE_URL
+        - name: OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: OIDC_CLIENT_ID
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: OIDC_CLIENT_SECRET
+        - name: OIDC_ISSUER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: OIDC_ISSUER_URL
+        - name: OIDC_REDIRECT_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: OIDC_REDIRECT_URL
+        - name: AFRICAS_TALKING_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AFRICAS_TALKING_API_KEY
+        - name: AFRICAS_TALKING_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: AFRICAS_TALKING_BASE_URL
+        - name: AFRICAS_TALKING_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: AFRICAS_TALKING_USERNAME
+        - name: SMTP_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: SMTP_USERNAME
+        - name: SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: SMTP_PASSWORD
+        - name: SMTP_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SMTP_HOST
+        - name: SMTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SMTP_PORT
+        - name: SMTP_FROM_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SMTP_FROM_EMAIL
+        - name: ADMIN_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: ADMIN_EMAIL
+        livenessProbe:
+          httpGet:
+            path: /v1/shop/1/categories
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /v1/shop/1/categories
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: savannah-pos-service
+  namespace: savannah-pos
 spec:
   selector:
     app: savannah-pos
@@ -36,4 +140,4 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 8080
-  type: LoadBalancer
+  type: ClusterIP

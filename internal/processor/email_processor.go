@@ -136,12 +136,10 @@ func (e *emailClient) buildMessage(req *models.EmailRequest) []byte {
     return message
 }
 
-// sendSMTP handles the actual SMTP connection and email sending
 func (e *emailClient) sendSMTP(to []string, message []byte, auth smtp.Auth) error {
     // SMTP server address
     smtpAddr := fmt.Sprintf("%s:%d", e.emailService.SMTPHost, e.emailService.SMTPPort)
 
-    // For TLS connection (most modern SMTP servers require this)
     tlsConfig := &tls.Config{
         ServerName: e.emailService.SMTPHost,
     }
@@ -195,7 +193,6 @@ func (e *emailClient) sendSMTP(to []string, message []byte, auth smtp.Auth) erro
     return client.Quit()
 }
 
-// createOrderEmailBody creates a nicely formatted HTML email for order notifications
 func (e *emailClient) createOrderEmailBody(order *models.Order) string {
     return fmt.Sprintf(`
 <!DOCTYPE html>
@@ -319,7 +316,6 @@ func (e *emailClient) generateOrderItemsHTML(order *models.Order) string {
         </tr>`
 }
 
-// getDiscountAmount returns the discount amount (handles nil discount)
 func (e *emailClient) getDiscountAmount(order *models.Order) float64 {
     if order.Discount == nil {
         return 0.0

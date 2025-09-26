@@ -98,7 +98,7 @@ func (n *orderNotification) SendOrderNotifications(order *models.Order) error {
         }
     }()
 
-    // Send email notification (async - don't block on failure)
+    // Send email notification 
     go func() {
         if err := n.SendOrderEmail(order); err != nil {
             log.Printf("Failed to send order email: %v", err)

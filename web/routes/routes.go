@@ -56,7 +56,7 @@ func BuildRouter(
 
 	emailClient := processor.NewEmailClient(emailService)
 
-	httpClient := &http.Client{} // A standard HTTP client
+	httpClient := &http.Client{} 
 	smsClient := processor.NewSMSClient(smsService, httpClient)
 	orderNotification := notification.NewOrderNotification(smsClient, emailClient)
 
@@ -67,11 +67,22 @@ func BuildRouter(
 	orderService := services.NewOrderService(customerService, domainStore, orderNotification)
 	productService := services.NewProductService(domainStore)
 
-	// ✅ OIDC Auth service (now using config from .env)
+	// OIDC Auth service (now using config from .env)
 	oidcService, err := auth.NewOIDCProvider(&config.AppConfig.OIDC)
 	if err != nil {
 		panic(err)
 	}
+
+	// AUTHENTICATION SETUP NOTE:
+	// The OIDC authentication middleware is fully implemented and ready to use.
+	// To protect API endpoints, simply uncomment the lines below:
+	//
+	// protected := baseAPIGroup.Group("/api")
+	// protected.Use(middleware.AuthMiddleware(oidcService))
+	//
+	// Then register protected endpoints with the 'protected' group instead of 'baseAPIGroup'.
+	// Currently endpoints are open for demonstration purposes.
+
 
 	// Register endpoints
 	authhandler.AddEndpoints(baseAPIGroup, dB, oidcService, customerService, config.AppConfig.JWTSecret)

@@ -7,7 +7,15 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Logger defines a simple interface you can use in your app
+var TestLogger *AppLogger
+
+func InitTestLogger() {
+	TestLogger = &AppLogger{
+		logger: log.With().Str("service", "test").Logger(),
+	}
+}
+
+
 type Logger interface {
 	Error(msg string)
 	Errorf(msg string, values ...interface{})

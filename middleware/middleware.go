@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AuthMiddleware enforces OIDC token verification with better error handling
 func AuthMiddleware(oidcSvc auth.OIDCService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Printf("Auth middleware called for path: %s", c.FullPath())
@@ -24,7 +23,6 @@ func AuthMiddleware(oidcSvc auth.OIDCService) gin.HandlerFunc {
 			return
 		}
 
-		// Expect header in format: "Bearer <token>"
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			log.Printf("Invalid Authorization header format")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -68,39 +66,32 @@ func AuthMiddleware(oidcSvc auth.OIDCService) gin.HandlerFunc {
 	}
 }
 
-// OptionalAuthMiddleware allows both authenticated and non-authenticated requests
 func OptionalAuthMiddleware(oidcSvc auth.OIDCService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			// No auth header, continue without authentication
 			c.Next()
 			return
 		}
 
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			// Invalid format, continue without authentication
 			c.Next()
 			return
 		}
 
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 		if token == "" {
-			// Empty token, continue without authentication
 			c.Next()
 			return
 		}
 
-		// Try to verify token, but don't fail if it doesn't work
 		userInfo, err := oidcSvc.VerifyToken(c.Request.Context(), token)
 		if err != nil {
 			log.Printf("Optional auth failed: %v", err)
-			// Continue without authentication
 			c.Next()
 			return
 		}
 
-		// Store user info if authentication succeeded
 		c.Set("user", userInfo)
 		c.Set("user_email", userInfo.Email)
 		c.Set("user_sub", userInfo.Sub)
@@ -110,7 +101,6 @@ func OptionalAuthMiddleware(oidcSvc auth.OIDCService) gin.HandlerFunc {
 	}
 }
 
-// Helper function to get user from context
 func GetUserFromContext(c *gin.Context) (*auth.OIDCUserInfo, bool) {
 	user, exists := c.Get("user")
 	if !exists {
@@ -121,7 +111,6 @@ func GetUserFromContext(c *gin.Context) (*auth.OIDCUserInfo, bool) {
 	return userInfo, ok
 }
 
-// Helper function for min
 func min(a, b int) int {
 	if a < b {
 		return a

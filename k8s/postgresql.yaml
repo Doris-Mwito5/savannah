@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-postgresql
+  namespace: savannah-pos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-postgresql
+  template:
+    metadata:
+      labels:
+        app: db-postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:17
+        env:
+        - name: POSTGRES_DB
+          value: "savannah"
+        - name: POSTGRES_USER
+          value: "dev"
+        - name: POSTGRES_PASSWORD
+          value: "savannah"
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgresql-data
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - dev
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - dev
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgresql-data
+        persistentVolumeClaim:
+          claimName: postgresql-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-postgresql
+  namespace: savannah-pos
+spec:
+  selector:
+    app: db-postgresql
+  ports:
+  - port: 5432
+    targetPort: 5432
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-pvc
+  namespace: savannah-pos
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

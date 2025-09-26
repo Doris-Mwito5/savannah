@@ -47,12 +47,10 @@ func (s *customerService) CreateCustomer(
         )
     }
 
-    // A non-nil error that is NOT a "no rows" error should be returned.
     if !apperr.IsNoRowsErr(err) {
         return nil, err
     }
 
-    // If we've reached this point, the customer does not exist in the database.
     customer := &models.Customer{
         Name:         form.Name,
         Email:        form.Email,
